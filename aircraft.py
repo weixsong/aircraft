@@ -6,6 +6,7 @@ import random
 from ship import Ship
 from sprite import Rock
 from utils import Util
+from threading import Timer
 import threading
 
 class Window(Tkinter.Frame):
@@ -48,6 +49,8 @@ class Window(Tkinter.Frame):
     self.parent.bind('<Key>', self.controller.on_key_down)
     self.parent.bind("<KeyRelease>", self.controller.on_key_release)
     self.parent.bind('<Motion>', self.controller.mouse_move)
+    self.parent.bind('<Button-1>', self.controller.mouse_click)
+
     self.canvas.update()
 
   def center_window(self):
@@ -70,9 +73,8 @@ class MyCanvas(Tkinter.Canvas):
     self.tatras = ImageTk.PhotoImage(self.background_img)
     self.debris_img = Image.open('./images/debris2_blue.png')
     self.debris = ImageTk.PhotoImage(self.debris_img)
-
-    self.create_image(0, 0, anchor=Tkinter.NW, image=self.tatras)
-    self.create_image(0, 0, anchor=Tkinter.NW, image=self.debris)
+    self.splash_img = Image.open('./images/splash.png')
+    self.splash = ImageTk.PhotoImage(self.splash_img)
 
     self.font_size = 20
     self.font = tkFont.Font(family='Times',size=self.font_size, name="font%s" % self.font_size)
@@ -93,6 +95,14 @@ class MyCanvas(Tkinter.Canvas):
     # draw UI
     self.create_text(50, 30, text='Lives', fill='White', font=self.font)
     self.create_text(750, 30, text='Score', fill='White', font=self.font)
+    self.create_text(50, 60, text=str(self.controller.lives), fill='White', font=self.font)
+    self.create_text(750, 60, text=str(self.controller.score), fill='White', font=self.font)
+
+    # draw splash
+    if not self.controller.is_started:
+      self.create_image(400 - 200, 300 - 150, anchor=Tkinter.NW, image=self.splash)
+      self.after(16, self.update)
+      return
 
     # draw ship
     self.controller.ship.draw()
@@ -123,11 +133,22 @@ class Timer(threading.Thread):
   def stop(self):
     self.event.set()
 
-class GameController:
+class GameController(Tkinter.Frame):
   def __init__(self, window, canvas):
+    Tkinter.Frame.__init__(self, window)
     self.window = window
     self.canvas = canvas
 
+    self.ship = Ship([400, 300], [0, 0], 0, self.canvas)
+    self.is_started = False
+    self.lives = 3
+    self.score = 0
+
+    self.rock_group = set([])
+    self.missile_group = set([])
+    self.explosion_group = set([])
+
+  def new_game(self):
     self.ship = Ship([400, 300], [0, 0], 0, self.canvas)
     self.is_started = True
     self.lives = 3
@@ -136,9 +157,7 @@ class GameController:
     self.rock_group = set([])
     self.missile_group = set([])
     self.explosion_group = set([])
-
-    self.timer = Timer(self)
-    self.timer.start()
+    self.rock_spawner()
 
   def minus_live(self):
     self.lives -= 1
@@ -173,22 +192,32 @@ class GameController:
   def mouse_move(self, event):
     self.window.label_mouse.config(text='mouse x:{}, y:{}'.format(event.x, event.y))
 
+  def mouse_click(self, event):
+    self.window.label_mouse.config(text='mouse click x:{}, y:{}'.format(event.x, event.y))
+    inwidth = (400 - 400 / 2) < event.x < (400 + 400 / 2)
+    inheight = (300 - 300 / 2) < event.y < (300 + 300 / 2)
+    if (not self.is_started) and inwidth and inheight:
+      self.new_game()
+
   def rock_spawner(self):
-    rock_pos = [random.randrange(0, self.canvas.CANVAS_WIDTH), random.randrange(0, self.canvas.CANVAS_HEIGHT)]
-    rock_vel = [random.random() * .6 - .3, random.random() * .6 - .3]
-    rock_avel = random.random() * .2 - .1
-
-    add_vel = self.score * 0.5 + 1
-    rock_vel = [rock_vel[0] * add_vel, rock_vel[1] * add_vel]
-    rock = Rock(rock_pos, rock_vel, 0, rock_avel, self.canvas)
-
     if self.is_started:
+      rock_pos = [random.randrange(0, self.canvas.CANVAS_WIDTH), random.randrange(0, self.canvas.CANVAS_HEIGHT)]
+      rock_vel = [random.random() * .6 - .3, random.random() * .6 - .3]
+      rock_avel = random.random() * .2 - .1
+
+      add_vel = self.score * 0.5 + 1
+      rock_vel = [rock_vel[0] * add_vel, rock_vel[1] * add_vel]
+      rock = Rock(rock_pos, rock_vel, 0, rock_avel, self.canvas)
+
       if len(self.rock_group) >= Rock.LIMIT:
+        self.after(1500, self.rock_spawner)
         return
       distance = Util.dist(rock.get_position(), self.ship.get_position())
       if distance < 200:
+        self.after(1500, self.rock_spawner)
         return
       self.rock_group.add(rock)
+      self.after(1500, self.rock_spawner)
 
 if __name__ == '__main__':
   root = Tkinter.Tk()
