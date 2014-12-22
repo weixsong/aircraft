@@ -56,6 +56,7 @@ class Ship:
     self.vel[1] *= .99
 
   def set_thrust(self, on):
+    # TODO: how to play mp3?
     self.thrust = on
     if on:
       pygame.mixer.music.play()

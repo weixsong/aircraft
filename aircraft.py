@@ -4,6 +4,9 @@ import ImageTk
 import tkFont
 import random
 from ship import Ship
+from sprite import Rock
+from utils import Util
+import threading
 
 class Window(Tkinter.Frame):
 
@@ -97,8 +100,28 @@ class MyCanvas(Tkinter.Canvas):
     # ship update
     self.controller.ship.update()
 
+    # rock update
+    for rock in list(self.controller.rock_group):
+      rock.draw()
+      rock.update()
+
     # call update
     self.after(16, self.update)
+
+class Timer(threading.Thread):
+  def __init__(self, controller):
+    threading.Thread.__init__(self)
+    self.event = threading.Event()
+    self.controller = controller
+
+  def run(self):
+    while not self.event.is_set():
+      """ The things I want to do go here. """
+      self.controller.rock_spawner()
+      self.event.wait(2)
+
+  def stop(self):
+    self.event.set()
 
 class GameController:
   def __init__(self, window, canvas):
@@ -113,6 +136,9 @@ class GameController:
     self.rock_group = set([])
     self.missile_group = set([])
     self.explosion_group = set([])
+
+    self.timer = Timer(self)
+    self.timer.start()
 
   def minus_live(self):
     self.lives -= 1
@@ -130,6 +156,8 @@ class GameController:
       self.ship.increment_angle_vel()
     if event.keysym == 'Right':
       self.ship.decrement_angle_vel()
+    if event.keysym == 'Space':
+      self.ship.shoot(self.missile_group)
 
   def on_key_release(self, event):
     self.window.label_key.config(text='key up: ' + str(event.keysym))
@@ -144,6 +172,23 @@ class GameController:
 
   def mouse_move(self, event):
     self.window.label_mouse.config(text='mouse x:{}, y:{}'.format(event.x, event.y))
+
+  def rock_spawner(self):
+    rock_pos = [random.randrange(0, self.canvas.CANVAS_WIDTH), random.randrange(0, self.canvas.CANVAS_HEIGHT)]
+    rock_vel = [random.random() * .6 - .3, random.random() * .6 - .3]
+    rock_avel = random.random() * .2 - .1
+
+    add_vel = self.score * 0.5 + 1
+    rock_vel = [rock_vel[0] * add_vel, rock_vel[1] * add_vel]
+    rock = Rock(rock_pos, rock_vel, 0, rock_avel, self.canvas)
+
+    if self.is_started:
+      if len(self.rock_group) >= Rock.LIMIT:
+        return
+      distance = Util.dist(rock.get_position(), self.ship.get_position())
+      if distance < 200:
+        return
+      self.rock_group.add(rock)
 
 if __name__ == '__main__':
   root = Tkinter.Tk()

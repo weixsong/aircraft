@@ -1,52 +1,61 @@
-class Sprite:
-    def __init__(self, pos, vel, ang, ang_vel, image, info, sound = None):
-        self.pos = [pos[0],pos[1]]
-        self.vel = [vel[0],vel[1]]
-        self.angle = ang
-        self.angle_vel = ang_vel
-        self.image = image
-        self.image_center = info.get_center()
-        self.image_size = info.get_size()
-        self.radius = info.get_radius()
-        self.lifespan = info.get_lifespan()
-        self.animated = info.get_animated()
-        self.age = 0
-        if sound:
-            sound.rewind()
-            sound.play()
-   
-    def draw(self, canvas):
-        if self.animated == True:
-            explosion_sound.rewind()
-            explosion_sound.play()
-            canvas.draw_image(self.image, [self.image_center[0] + self.age * self.image_size[0], self.image_center[1]], self.image_size,
-                          self.pos, self.image_size, self.angle)
-            return
-        canvas.draw_image(self.image, self.image_center, self.image_size,
-                          self.pos, self.image_size, self.angle)
+import Image 
+import ImageTk
+import Tkinter
+from utils import Util
+import math
 
-    def update(self):
-        # update angle
-        self.angle += self.angle_vel
-        self.age += 1
-        if self.age > self.lifespan:
-            return True
-        
-        # update position
-        self.pos[0] = (self.pos[0] + self.vel[0]) % WIDTH
-        self.pos[1] = (self.pos[1] + self.vel[1]) % HEIGHT
-        return False
-        
-    def get_position(self):
-        return self.pos
-    
-    def get_radius(self):
-        return self.radius
-        
-    def collide(self, other_object):
-        distance = dist(self.get_position(), other_object.get_position())
-        sum_r = self.get_radius() + other_object.get_radius()
-        if distance > sum_r:
-            return False
-        else:
-            return True
+class Sprite:
+  ''' base class for Rock, Bullet '''
+
+  def __init__(self, pos, vel, ang, ang_vel, radius, canvas):
+    self.pos = pos
+    self.vel = vel
+    self.angle = ang
+    self.angle_vel = ang_vel
+    self.radius = radius
+    self.canvas = canvas
+
+  def collide(self, other_object):
+    distance = Util.dist(self.get_position(), other_object.get_position())
+    sum_r = self.get_radius() + other_object.get_radius()
+    if distance > sum_r:
+      return False
+    else:
+      return True
+
+  def draw(self):
+    assert False, "action should be defined"
+
+  def update(self):
+    assert False, "action should be defined"
+
+  def get_position(self):
+    return self.pos
+
+  def get_radius(self):
+    return self.radius
+
+class Rock(Sprite):
+  LIMIT = 12
+  RADIUS = 40
+  IMG_CENTER = [45, 45]
+  IMG_SIZE = [90, 90]
+
+  def __init__(self, pos, vel, ang, ang_vel, canvas):
+    Sprite.__init__(self, pos, vel, ang, ang_vel, Rock.RADIUS, canvas)
+    self.img = Image.open("./images/asteroid_blue.png")
+
+  def draw(self):
+    upleft_x = self.pos[0] - Rock.IMG_CENTER[0]
+    upleft_y = self.pos[1] - Rock.IMG_CENTER[1]
+    self.image = ImageTk.PhotoImage(self.img.rotate(self.angle * 180 / math.pi, resample=Image.BICUBIC))
+    self.canvas.create_image(upleft_x, upleft_y, anchor=Tkinter.NW, image=self.image)
+
+  def update(self):
+    # update angle
+    self.angle += self.angle_vel
+
+    # update position
+    self.pos[0] = (self.pos[0] + self.vel[0]) % self.canvas.CANVAS_WIDTH
+    self.pos[1] = (self.pos[1] - self.vel[1]) % self.canvas.CANVAS_HEIGHT
+    return False
