@@ -86,3 +86,33 @@ class Bullet(Sprite):
     self.pos[0] = (self.pos[0] + self.vel[0]) % self.canvas.CANVAS_WIDTH
     self.pos[1] = (self.pos[1] - self.vel[1]) % self.canvas.CANVAS_HEIGHT
     return False
+
+class Explosion(Sprite):
+  RADIUS = 17
+  LIFE = 24
+  IMG_CENTER = [64, 64]
+  IMG_SIZE = [128, 128]
+
+  def __init__(self, pos, canvas):
+    Sprite.__init__(self, pos, [0, 0], 0, [0, 0], Explosion.RADIUS, canvas)
+    self.img = Image.open('./images/explosion_alpha.png')
+    self.age = 0
+    self.x = self.pos[0] - Explosion.IMG_CENTER[0]
+    self.y = self.pos[1] - Explosion.IMG_CENTER[1]
+
+  def draw(self):
+    x1 = 0 + self.age * Explosion.IMG_SIZE[0]
+    y1 = 0
+    x2 = x1 + Explosion.IMG_SIZE[0]
+    y2 = Explosion.IMG_SIZE[1]
+    image = self.img.crop((x1, y1, x2, y2))
+    self.image = ImageTk.PhotoImage(image)
+    self.canvas.create_image(self.x, self.y, anchor=Tkinter.NW, image=self.image)
+
+  def update(self):
+    # update age
+    self.age += 1
+    if self.age > Bullet.LIFE:
+        return True
+
+    return False

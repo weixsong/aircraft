@@ -5,6 +5,7 @@ import tkFont
 import random
 from ship import Ship
 from sprite import Rock
+from sprite import Explosion
 from utils import Util
 from threading import Timer
 import threading
@@ -98,12 +99,6 @@ class MyCanvas(Tkinter.Canvas):
     self.create_text(50, 60, text=str(self.controller.lives), fill='White', font=self.font)
     self.create_text(750, 60, text=str(self.controller.score), fill='White', font=self.font)
 
-    # draw splash
-    if not self.controller.is_started:
-      self.create_image(400 - 200, 300 - 150, anchor=Tkinter.NW, image=self.splash)
-      self.after(16, self.update)
-      return
-
     # draw ship
     self.controller.ship.draw()
 
@@ -113,6 +108,22 @@ class MyCanvas(Tkinter.Canvas):
     # rock update
     self.controller.process_sprite_group(self.controller.rock_group)
     self.controller.process_sprite_group(self.controller.missile_group)
+
+    # collide detection
+    if self.controller.group_collide(self.controller.rock_group, self.controller.ship) == True:
+      self.controller.lives -= 1
+      if self.controller.lives == 0:
+        self.controller.game_over()
+    num = self.controller.group_group_collide(self.controller.rock_group, self.controller.missile_group)
+    self.controller.score += num
+
+    self.controller.process_sprite_group(self.controller.explosion_group)
+
+    # draw splash
+    if not self.controller.is_started:
+      self.create_image(400 - 200, 300 - 150, anchor=Tkinter.NW, image=self.splash)
+      self.after(16, self.update)
+      return
 
     # call update
     self.after(16, self.update)
@@ -157,6 +168,13 @@ class GameController(Tkinter.Frame):
     self.missile_group = set([])
     self.explosion_group = set([])
     self.rock_spawner()
+
+  def game_over(self):
+    self.rock_group = set([])
+    self.missile_group = set([])
+    self.explosion_group = set([])
+    self.ship.set_thrust(False)
+    self.is_started = False
 
   def minus_live(self):
     self.lives -= 1
@@ -224,6 +242,26 @@ class GameController(Tkinter.Frame):
         group.remove(drawable)
         continue
       drawable.draw()
+
+  def group_group_collide(self, group1, group2):
+    num = 0
+    for item in list(group1):
+      res = self.group_collide(group2, item)
+      if res == True:
+        group1.discard(item)
+        num += 1        
+    return num
+
+  def group_collide(self, group, other):
+    collide = False
+    for e in list(group):
+      if e.collide(other) == True:
+        collide = True
+        group.remove(e)
+        explosion = Explosion(e.get_position(), self.canvas)
+        self.explosion_group.add(explosion)
+
+    return collide
 
 if __name__ == '__main__':
   root = Tkinter.Tk()
