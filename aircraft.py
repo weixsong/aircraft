@@ -22,15 +22,10 @@ class Window(Tkinter.Frame):
     self.parent.title(Window.TITLE)
     self.pack(fill=Tkinter.BOTH, expand=1)
     self.parent.resizable(width=False, height=False)
-
     self.initUI()
 
   def initUI(self):
     self.center_window()
-
-    self.parent.bind('<Key>', self.on_key_down)
-    self.parent.bind("<KeyRelease>", self.on_key_release)
-    self.parent.bind('<Motion>', self.mouse_move)
 
     self.canvas = MyCanvas(self, width=MyCanvas.CANVAS_WIDTH, height=MyCanvas.CANVAS_HEIGHT, 
       background='black')
@@ -45,6 +40,13 @@ class Window(Tkinter.Frame):
     self.label_info = Tkinter.Label(self, text="info", background='white')
     self.label_info.pack(side=Tkinter.RIGHT, expand=1)
 
+    self.controller = GameController(self, self.canvas)
+    self.canvas.set_controller(self.controller)
+    self.parent.bind('<Key>', self.controller.on_key_down)
+    self.parent.bind("<KeyRelease>", self.controller.on_key_release)
+    self.parent.bind('<Motion>', self.controller.mouse_move)
+    self.canvas.update()
+
   def center_window(self):
     sw = self.parent.winfo_screenwidth()
     sh = self.parent.winfo_screenheight()
@@ -53,15 +55,6 @@ class Window(Tkinter.Frame):
     y = (sh - Window.WINDOW_HEIGHT) / 2
     geo = '{0}x{1}+{2}+{3}'.format(str(Window.WINDOW_WIDTH), str(Window.WINDOW_HEIGHT), str(x), str(y))
     self.parent.geometry(geo)
-
-  def on_key_down(self, event):
-    self.label_key.config(text='key down: ' + str(event.keysym))
-
-  def on_key_release(self, event):
-    self.label_key.config(text='key up: ' + str(event.keysym))
-
-  def mouse_move(self, event):
-    self.label_mouse.config(text='mouse x:{}, y:{}'.format(event.x, event.y))
 
 class MyCanvas(Tkinter.Canvas):
   CANVAS_WIDTH = 800
@@ -82,16 +75,15 @@ class MyCanvas(Tkinter.Canvas):
     self.font = tkFont.Font(family='Times',size=self.font_size, name="font%s" % self.font_size)
     self.time = 0
 
-    self.x = 0 # for test
-    self.ship = Ship([400, 300], [5, 4], 90, self)
-    self.update()
+  def set_controller(self, controller):
+    self.controller = controller
 
   def update(self):
     self.delete('all')
 
     # animate the debris
     self.time += 1
-    wtime = (self.time) % MyCanvas.CANVAS_WIDTH
+    wtime = (self.time / 4) % MyCanvas.CANVAS_WIDTH
     self.create_image(0, 0, anchor=Tkinter.NW, image=self.tatras)
     self.create_image(wtime, 0, anchor=Tkinter.NW, image=self.debris)
 
@@ -100,21 +92,21 @@ class MyCanvas(Tkinter.Canvas):
     self.create_text(750, 30, text='Score', fill='White', font=self.font)
 
     # draw ship
-    self.ship.draw()
+    self.controller.ship.draw()
 
     # ship update
-    self.ship.update()
+    self.controller.ship.update()
 
-    # test
-    self.create_rectangle(self.x, 450, 0, 480, outline='#fb0', fill='#fb0')
-    self.x += 3
-    if self.x > MyCanvas.CANVAS_WIDTH:
-      self.x = 0
-    self.after(100, self.update)
+    # call update
+    self.after(16, self.update)
 
 class GameController:
-  def __init__(self):
-    self.is_started = False
+  def __init__(self, window, canvas):
+    self.window = window
+    self.canvas = canvas
+
+    self.ship = Ship([400, 300], [0, 0], 0, self.canvas)
+    self.is_started = True
     self.lives = 3
     self.score = 0
 
@@ -127,6 +119,31 @@ class GameController:
 
   def add_score(self):
     self.score += 1
+
+  def on_key_down(self, event):
+    self.window.label_key.config(text='key down: ' + str(event.keysym))
+    if self.is_started == False:
+      return
+    if event.keysym == 'Up':
+      self.ship.set_thrust(True)
+    if event.keysym == 'Left':
+      self.ship.increment_angle_vel()
+    if event.keysym == 'Right':
+      self.ship.decrement_angle_vel()
+
+  def on_key_release(self, event):
+    self.window.label_key.config(text='key up: ' + str(event.keysym))
+    if self.is_started == False:
+      return
+    if event.keysym == 'Up':
+      self.ship.set_thrust(False)
+    if event.keysym == 'Left':
+      self.ship.decrement_angle_vel()
+    if event.keysym == 'Right':
+      self.ship.increment_angle_vel()
+
+  def mouse_move(self, event):
+    self.window.label_mouse.config(text='mouse x:{}, y:{}'.format(event.x, event.y))
 
 if __name__ == '__main__':
   root = Tkinter.Tk()

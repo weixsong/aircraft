@@ -3,8 +3,7 @@ import math
 class Util:
   @staticmethod
   def angle_to_vector(ang):
-    rad = float(ang) / float(180) * math.pi
-    return [math.cos(rad), math.sin(rad)]
+    return [math.cos(ang), math.sin(ang)]
 
   @staticmethod
   def dist(p, q):
