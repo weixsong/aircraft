@@ -2,6 +2,8 @@ import Tkinter
 import Image 
 import ImageTk
 import tkFont
+import random
+from ship import Ship
 
 class Window(Tkinter.Frame):
 
@@ -81,6 +83,7 @@ class MyCanvas(Tkinter.Canvas):
     self.time = 0
 
     self.x = 0 # for test
+    self.ship = Ship([400, 300], [5, 4], 90, self)
     self.update()
 
   def update(self):
@@ -96,6 +99,12 @@ class MyCanvas(Tkinter.Canvas):
     self.create_text(50, 30, text='Lives', fill='White', font=self.font)
     self.create_text(750, 30, text='Score', fill='White', font=self.font)
 
+    # draw ship
+    self.ship.draw()
+
+    # ship update
+    self.ship.update()
+
     # test
     self.create_rectangle(self.x, 450, 0, 480, outline='#fb0', fill='#fb0')
     self.x += 3
@@ -108,6 +117,10 @@ class GameController:
     self.is_started = False
     self.lives = 3
     self.score = 0
+
+    self.rock_group = set([])
+    self.missile_group = set([])
+    self.explosion_group = set([])
 
   def minus_live(self):
     self.lives -= 1
