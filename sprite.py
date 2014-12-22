@@ -59,3 +59,30 @@ class Rock(Sprite):
     self.pos[0] = (self.pos[0] + self.vel[0]) % self.canvas.CANVAS_WIDTH
     self.pos[1] = (self.pos[1] - self.vel[1]) % self.canvas.CANVAS_HEIGHT
     return False
+
+class Bullet(Sprite):
+  RADIUS = 3
+  LIFE = 35
+  IMG_CENTER = [5, 5]
+  IMG_SIZE = [10, 10]
+
+  def __init__(self, pos, vel, ang, ang_vel, canvas):
+    Sprite.__init__(self, pos, vel, ang, ang_vel, Bullet.RADIUS, canvas)
+    self.img = Image.open('./images/shot2.png')
+    self.age = 0
+
+  def draw(self):
+    upleft_x = self.pos[0] - Bullet.IMG_CENTER[0]
+    upleft_y = self.pos[1] - Bullet.IMG_CENTER[1]
+    self.image = ImageTk.PhotoImage(self.img) # bullet do not need rotate
+    self.canvas.create_image(upleft_x, upleft_y, anchor=Tkinter.NW, image=self.image)
+
+  def update(self):
+    # update position
+    self.age += 1
+    if self.age > Bullet.LIFE:
+        return True
+
+    self.pos[0] = (self.pos[0] + self.vel[0]) % self.canvas.CANVAS_WIDTH
+    self.pos[1] = (self.pos[1] - self.vel[1]) % self.canvas.CANVAS_HEIGHT
+    return False

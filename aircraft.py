@@ -66,7 +66,7 @@ class MyCanvas(Tkinter.Canvas):
   CANVAS_WIDTH = 800
   CANVAS_HEIGHT = 600
 
-  def __init__(self, root,  cnf={}, **args):
+  def __init__(self, root, cnf={}, **args):
     Tkinter.Canvas.__init__(self, root, cnf={}, **args)
 
     self.background_img = Image.open("./images/nebula_blue.f2014.png")
@@ -111,9 +111,8 @@ class MyCanvas(Tkinter.Canvas):
     self.controller.ship.update()
 
     # rock update
-    for rock in list(self.controller.rock_group):
-      rock.draw()
-      rock.update()
+    self.controller.process_sprite_group(self.controller.rock_group)
+    self.controller.process_sprite_group(self.controller.missile_group)
 
     # call update
     self.after(16, self.update)
@@ -172,11 +171,9 @@ class GameController(Tkinter.Frame):
     if event.keysym == 'Up':
       self.ship.set_thrust(True)
     if event.keysym == 'Left':
-      self.ship.increment_angle_vel()
-    if event.keysym == 'Right':
       self.ship.decrement_angle_vel()
-    if event.keysym == 'Space':
-      self.ship.shoot(self.missile_group)
+    if event.keysym == 'Right':
+      self.ship.increment_angle_vel()
 
   def on_key_release(self, event):
     self.window.label_key.config(text='key up: ' + str(event.keysym))
@@ -185,9 +182,11 @@ class GameController(Tkinter.Frame):
     if event.keysym == 'Up':
       self.ship.set_thrust(False)
     if event.keysym == 'Left':
-      self.ship.decrement_angle_vel()
-    if event.keysym == 'Right':
       self.ship.increment_angle_vel()
+    if event.keysym == 'Right':
+      self.ship.decrement_angle_vel()
+    if event.keysym == 'space':
+      self.ship.shoot(self.missile_group)
 
   def mouse_move(self, event):
     self.window.label_mouse.config(text='mouse x:{}, y:{}'.format(event.x, event.y))
@@ -218,6 +217,13 @@ class GameController(Tkinter.Frame):
         return
       self.rock_group.add(rock)
       self.after(1500, self.rock_spawner)
+
+  def process_sprite_group(self, group):
+    for drawable in list(group):
+      if drawable.update() == True:
+        group.remove(drawable)
+        continue
+      drawable.draw()
 
 if __name__ == '__main__':
   root = Tkinter.Tk()
