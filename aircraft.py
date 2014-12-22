@@ -1,6 +1,7 @@
 import Tkinter
 import Image 
 import ImageTk
+import tkFont
 
 class Window(Tkinter.Frame):
 
@@ -75,6 +76,8 @@ class MyCanvas(Tkinter.Canvas):
     self.create_image(0, 0, anchor=Tkinter.NW, image=self.tatras)
     self.create_image(0, 0, anchor=Tkinter.NW, image=self.debris)
 
+    self.font_size = 20
+    self.font = tkFont.Font(family='Times',size=self.font_size, name="font%s" % self.font_size)
     self.time = 0
 
     self.x = 0 # for test
@@ -82,15 +85,35 @@ class MyCanvas(Tkinter.Canvas):
 
   def update(self):
     self.delete('all')
+
+    # animate the debris
     self.time += 1
-    wtime = (self.time / 4) % MyCanvas.CANVAS_WIDTH
+    wtime = (self.time) % MyCanvas.CANVAS_WIDTH
     self.create_image(0, 0, anchor=Tkinter.NW, image=self.tatras)
     self.create_image(wtime, 0, anchor=Tkinter.NW, image=self.debris)
 
+    # draw UI
+    self.create_text(50, 30, text='Lives', fill='White', font=self.font)
+    self.create_text(750, 30, text='Score', fill='White', font=self.font)
+
     # test
-    self.create_rectangle(self.x, 10, 0, 80, outline='#fb0', fill='#fb0')
+    self.create_rectangle(self.x, 450, 0, 480, outline='#fb0', fill='#fb0')
     self.x += 3
+    if self.x > MyCanvas.CANVAS_WIDTH:
+      self.x = 0
     self.after(100, self.update)
+
+class GameController:
+  def __init__(self):
+    self.is_started = False
+    self.lives = 3
+    self.score = 0
+
+  def minus_live(self):
+    self.lives -= 1
+
+  def add_score(self):
+    self.score += 1
 
 if __name__ == '__main__':
   root = Tkinter.Tk()
