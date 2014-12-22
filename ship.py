@@ -20,8 +20,8 @@ class Ship:
     self.image_size = [90, 90]
     self.canvas = canvas
     img = Image.open("./images/double_ship.png")
-    self.image_unthrust = img.crop((0, 0, self.image_size[0], self.image_size[1]))
-    self.image_thrust = img.crop((self.image_size[0], 0, self.image_size[0] + self.image_size[0], self.image_size[1]))
+    self.image_unthrust = img.crop((0, 0, self.image_size[0] - 1, self.image_size[1] - 1))
+    self.image_thrust = img.crop((self.image_size[0], 0, self.image_size[0] + self.image_size[0] - 1, self.image_size[1]))
 
     pygame.mixer.init()
     self.sound = pygame.mixer.music.load("./sounds/thrust.mp3")
@@ -30,10 +30,12 @@ class Ship:
     upleft_x = self.pos[0] - self.image_center[0]
     upleft_y = self.pos[1] - self.image_center[1]
     if self.thrust:
-      self.img = ImageTk.PhotoImage(self.image_thrust.rotate(self.angle * 180 / math.pi))
+      self.img = ImageTk.PhotoImage(self.image_thrust.rotate(self.angle * 180 / math.pi, resample=Image.BICUBIC))
+      # self.img = ImageTk.PhotoImage(self.image_thrust)
       self.canvas.create_image(upleft_x, upleft_y, anchor=Tkinter.NW, image=self.img)
     else:
-      self.img = ImageTk.PhotoImage(self.image_unthrust.rotate(self.angle * 180 / math.pi))
+      self.img = ImageTk.PhotoImage(self.image_unthrust.rotate(self.angle * 180 / math.pi, resample=Image.BICUBIC))
+      # self.img = ImageTk.PhotoImage(self.image_unthrust)
       self.canvas.create_image(upleft_x, upleft_y, anchor=Tkinter.NW, image=self.img)
 
   def update(self):
