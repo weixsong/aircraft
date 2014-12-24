@@ -2,7 +2,7 @@ import Image
 import ImageTk
 from utils import Util
 import Tkinter
-import pygame
+import sound
 import time
 import math
 from sprite import Bullet
@@ -24,9 +24,6 @@ class Ship:
     img = Image.open("./images/double_ship.png")
     self.image_unthrust = img.crop((0, 0, self.image_size[0] - 1, self.image_size[1] - 1))
     self.image_thrust = img.crop((self.image_size[0], 0, self.image_size[0] + self.image_size[0] - 1, self.image_size[1]))
-
-    pygame.mixer.init()
-    self.sound = pygame.mixer.music.load("./sounds/thrust.mp3")
 
   def draw(self):
     upleft_x = self.pos[0] - self.image_center[0]
@@ -58,12 +55,11 @@ class Ship:
     self.vel[1] *= .99
 
   def set_thrust(self, on):
-    # TODO: how to play mp3?
     self.thrust = on
     if on:
-      pygame.mixer.music.play()
+      sound.thrust.play()
     else:
-      pygame.mixer.music.stop()
+      sound.thrust.stop()
 
   def increment_angle_vel(self):
     self.angle_vel -= 0.03
@@ -87,6 +83,6 @@ class Ship:
     forward = Util.angle_to_vector(self.angle)
     radius = self.get_radius()
     missile_pos = [self.pos[0] + radius * forward[0], self.pos[1] - radius * forward[1]]
-    missile_vel = [self.vel[0] + 10 * forward[0], self.vel[1] + 10 * forward[1]]
+    missile_vel = [self.vel[0] + 15 * forward[0], self.vel[1] + 15 * forward[1]]
     a_missile = Bullet(missile_pos, missile_vel, self.angle, 0, self.canvas)
     missile_group.add(a_missile)

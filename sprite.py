@@ -3,6 +3,7 @@ import ImageTk
 import Tkinter
 from utils import Util
 import math
+import sound
 
 class Sprite:
   ''' base class for Rock, Bullet '''
@@ -62,12 +63,13 @@ class Rock(Sprite):
 
 class Bullet(Sprite):
   RADIUS = 3
-  LIFE = 35
+  LIFE = 25
   IMG_CENTER = [5, 5]
   IMG_SIZE = [10, 10]
 
   def __init__(self, pos, vel, ang, ang_vel, canvas):
     Sprite.__init__(self, pos, vel, ang, ang_vel, Bullet.RADIUS, canvas)
+    sound.missile.play()
     self.img = Image.open('./images/shot2.png')
     self.age = 0
 
@@ -99,8 +101,13 @@ class Explosion(Sprite):
     self.age = 0
     self.x = self.pos[0] - Explosion.IMG_CENTER[0]
     self.y = self.pos[1] - Explosion.IMG_CENTER[1]
+    self.sound = False
 
   def draw(self):
+    if self.sound == False:
+      sound.explosion.play()
+      self.sound = True
+
     x1 = 0 + self.age * Explosion.IMG_SIZE[0]
     y1 = 0
     x2 = x1 + Explosion.IMG_SIZE[0]

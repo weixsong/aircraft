@@ -9,6 +9,11 @@ from sprite import Explosion
 from utils import Util
 from threading import Timer
 import threading
+import sound
+import os
+
+# cancel auto-repeat
+os.system('xset r off')
 
 class Window(Tkinter.Frame):
 
@@ -47,7 +52,7 @@ class Window(Tkinter.Frame):
 
     self.controller = GameController(self, self.canvas)
     self.canvas.set_controller(self.controller)
-    self.parent.bind('<Key>', self.controller.on_key_down)
+    self.parent.bind('<KeyPress>', self.controller.on_key_down)
     self.parent.bind("<KeyRelease>", self.controller.on_key_release)
     self.parent.bind('<Motion>', self.controller.mouse_move)
     self.parent.bind('<Button-1>', self.controller.mouse_click)
@@ -158,6 +163,7 @@ class GameController(Tkinter.Frame):
     self.explosion_group = set([])
 
   def new_game(self):
+    sound.soundtrack.play()
     self.ship = Ship([400, 300], [0, 0], 0, self.canvas)
     self.is_started = True
     self.lives = 3
@@ -169,6 +175,7 @@ class GameController(Tkinter.Frame):
     self.rock_spawner()
 
   def game_over(self):
+    sound.soundtrack.stop()
     self.rock_group = set([])
     self.missile_group = set([])
     self.explosion_group = set([])
