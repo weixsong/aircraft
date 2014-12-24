@@ -194,17 +194,21 @@ class GameController(Tkinter.Frame):
     self.window.label_key.config(text='key down: ' + str(event.keysym))
     if self.is_started == False:
       return
+
     if event.keysym == 'Up':
       self.ship.set_thrust(True)
     if event.keysym == 'Left':
       self.ship.decrement_angle_vel()
     if event.keysym == 'Right':
       self.ship.increment_angle_vel()
+    if event.keysym == 'space':
+      self.ship.shoot(self.missile_group)
 
   def on_key_release(self, event):
     self.window.label_key.config(text='key up: ' + str(event.keysym))
     if self.is_started == False:
       return
+
     if event.keysym == 'Up':
       self.ship.set_thrust(False)
     if event.keysym == 'Left':
@@ -212,7 +216,7 @@ class GameController(Tkinter.Frame):
     if event.keysym == 'Right':
       self.ship.decrement_angle_vel()
     if event.keysym == 'space':
-      self.ship.shoot(self.missile_group)
+      pass
 
   def mouse_move(self, event):
     self.window.label_mouse.config(text='mouse x:{}, y:{}'.format(event.x, event.y))
