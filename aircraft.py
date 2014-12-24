@@ -116,7 +116,7 @@ class MyCanvas(Tkinter.Canvas):
 
     # collide detection
     if self.controller.group_collide(self.controller.rock_group, self.controller.ship) == True:
-      self.controller.lives -= 1
+      self.controller.minus_live()
       if self.controller.lives == 0:
         self.controller.game_over()
 
@@ -180,8 +180,8 @@ class GameController(Tkinter.Frame):
     self.missile_group = set([])
     self.explosion_group = set([])
     self.ship.set_thrust(False)
-    #self.ship.set_game_state(False)
-    self.ship.reset_angle_vel()
+    self.ship.set_game_state(False)
+    #self.ship.reset_angle_vel()
     self.is_started = False
 
   def minus_live(self):

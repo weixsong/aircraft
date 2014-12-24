@@ -29,12 +29,10 @@ class Ship:
     upleft_x = self.pos[0] - self.image_center[0]
     upleft_y = self.pos[1] - self.image_center[1]
     if self.thrust:
-      self.img = ImageTk.PhotoImage(self.image_thrust.rotate(self.angle * 180 / math.pi, resample=Image.BICUBIC))
-      # self.img = ImageTk.PhotoImage(self.image_thrust)
+      self.img = ImageTk.PhotoImage(self.image_thrust.rotate(self.angle * 180 / math.pi, resample=Image.BILINEAR))
       self.canvas.create_image(upleft_x, upleft_y, anchor=Tkinter.NW, image=self.img)
     else:
-      self.img = ImageTk.PhotoImage(self.image_unthrust.rotate(self.angle * 180 / math.pi, resample=Image.BICUBIC))
-      # self.img = ImageTk.PhotoImage(self.image_unthrust)
+      self.img = ImageTk.PhotoImage(self.image_unthrust.rotate(self.angle * 180 / math.pi, resample=Image.BILINEAR))
       self.canvas.create_image(upleft_x, upleft_y, anchor=Tkinter.NW, image=self.img)
 
   def update(self):
@@ -43,16 +41,19 @@ class Ship:
 
     # update position
     self.pos[0] = (self.pos[0] + self.vel[0]) % self.canvas.CANVAS_WIDTH
-    self.pos[1] = (self.pos[1] - self.vel[1]) % self.canvas.CANVAS_HEIGHT
+    self.pos[1] = (self.pos[1] + self.vel[1]) % self.canvas.CANVAS_HEIGHT
 
     # update velocity
-    if self.thrust:
-      acc = Util.angle_to_vector(self.angle)
+    if self.thrust == True:
+      acc = Util.angle_to_vector(-self.angle)
       self.vel[0] += acc[0] * .2
       self.vel[1] += acc[1] * .2
 
     self.vel[0] *= .99
     self.vel[1] *= .99
+
+    if self.game_on == False:
+      self.angle_vel *= 0.99
 
   def set_thrust(self, on):
     self.thrust = on
