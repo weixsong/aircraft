@@ -12,6 +12,7 @@ class Ship:
     self.pos = [pos[0], pos[1]]
     self.vel = [vel[0], vel[1]]
     self.thrust = False
+    self.game_on = True
 
     self.angle = angle
     self.angle_vel = 0
@@ -50,8 +51,8 @@ class Ship:
     # update velocity
     if self.thrust:
       acc = Util.angle_to_vector(self.angle)
-      self.vel[0] += acc[0] * .1
-      self.vel[1] += acc[1] * .1
+      self.vel[0] += acc[0] * .2
+      self.vel[1] += acc[1] * .2
 
     self.vel[0] *= .99
     self.vel[1] *= .99
@@ -69,6 +70,12 @@ class Ship:
 
   def decrement_angle_vel(self):
     self.angle_vel += 0.03
+
+  def reset_angle_vel(self):
+    self.angle_vel = 0.0
+
+  def set_game_state(self, state):
+    self.game_on = state
 
   def get_position(self):
     return self.pos
