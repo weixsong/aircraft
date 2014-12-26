@@ -132,17 +132,18 @@ class MyCanvas(Tkinter.Canvas):
     # call update
     self.after(16, self.update)
 
-class Timer(threading.Thread):
-  def __init__(self, controller):
+class RockSpanTimer(threading.Thread):
+  def __init__(self, controller, interval):
     threading.Thread.__init__(self)
     self.event = threading.Event()
     self.controller = controller
+    self.interval = interval
 
   def run(self):
     while not self.event.is_set():
       """ The things I want to do go here. """
       self.controller.rock_spawner()
-      self.event.wait(2)
+      self.event.wait(self.interval)
 
   def stop(self):
     self.event.set()
@@ -172,16 +173,17 @@ class GameController(Tkinter.Frame):
     self.rock_group = set([])
     self.missile_group = set([])
     self.explosion_group = set([])
-    self.rock_spawner()
+    self.timer = RockSpanTimer(self, 1.5)
+    self.timer.start()
 
   def game_over(self):
     sound.soundtrack.stop()
+    self.timer.stop()
     self.rock_group = set([])
     self.missile_group = set([])
     self.explosion_group = set([])
     self.ship.set_thrust(False)
     self.ship.set_game_state(False)
-    #self.ship.reset_angle_vel()
     self.is_started = False
 
   def minus_live(self):
@@ -239,14 +241,11 @@ class GameController(Tkinter.Frame):
       rock = Rock(rock_pos, rock_vel, 0, rock_avel, self.canvas)
 
       if len(self.rock_group) >= Rock.LIMIT:
-        self.after(1500, self.rock_spawner)
         return
       distance = Util.dist(rock.get_position(), self.ship.get_position())
       if distance < 200:
-        self.after(1500, self.rock_spawner)
         return
       self.rock_group.add(rock)
-      self.after(1500, self.rock_spawner)
 
   def process_sprite_group(self, group):
     for drawable in list(group):
