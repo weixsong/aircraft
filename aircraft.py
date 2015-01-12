@@ -33,6 +33,16 @@ class Window(Tkinter.Frame):
     self.pack(fill=Tkinter.BOTH, expand=1)
     self.parent.resizable(width=False, height=False)
     self.initUI()
+    self.parent.protocol("WM_DELETE_WINDOW", self.close)
+
+  def close(self):
+    # shutdown thread
+    if self.controller != None and self.controller.timer != None:
+      self.controller.timer.stop()
+    self.master.destroy()
+    print "Destoy root window."
+    self.master.quit()
+    print "Quit main loop."
 
   def initUI(self):
     self.center_window()
@@ -162,6 +172,7 @@ class GameController(Tkinter.Frame):
     self.rock_group = set([])
     self.missile_group = set([])
     self.explosion_group = set([])
+    self.timer = RockSpanTimer(self, 1.5)
 
   def new_game(self):
     sound.soundtrack.play()
@@ -232,6 +243,9 @@ class GameController(Tkinter.Frame):
 
   def rock_spawner(self):
     if self.is_started:
+      if len(self.rock_group) >= Rock.LIMIT:
+        return
+
       rock_pos = [random.randrange(0, self.canvas.CANVAS_WIDTH), random.randrange(0, self.canvas.CANVAS_HEIGHT)]
       rock_vel = [random.random() * .6 - .3, random.random() * .6 - .3]
       rock_avel = random.random() * .2 - .1
@@ -240,8 +254,6 @@ class GameController(Tkinter.Frame):
       rock_vel = [rock_vel[0] * add_vel, rock_vel[1] * add_vel]
       rock = Rock(rock_pos, rock_vel, 0, rock_avel, self.canvas)
 
-      if len(self.rock_group) >= Rock.LIMIT:
-        return
       distance = Util.dist(rock.get_position(), self.ship.get_position())
       if distance < 200:
         return
