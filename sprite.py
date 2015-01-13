@@ -58,7 +58,7 @@ class Rock(Sprite):
 
     # update position
     self.pos[0] = (self.pos[0] + self.vel[0]) % self.canvas.CANVAS_WIDTH
-    self.pos[1] = (self.pos[1] - self.vel[1]) % self.canvas.CANVAS_HEIGHT
+    self.pos[1] = (self.pos[1] + self.vel[1]) % self.canvas.CANVAS_HEIGHT
     return False
 
 class Bullet(Sprite):
@@ -86,7 +86,7 @@ class Bullet(Sprite):
         return True
 
     self.pos[0] = (self.pos[0] + self.vel[0]) % self.canvas.CANVAS_WIDTH
-    self.pos[1] = (self.pos[1] - self.vel[1]) % self.canvas.CANVAS_HEIGHT
+    self.pos[1] = (self.pos[1] + self.vel[1]) % self.canvas.CANVAS_HEIGHT
     return False
 
 class Explosion(Sprite):

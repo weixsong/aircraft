@@ -45,9 +45,9 @@ class Ship:
 
     # update velocity
     if self.thrust == True:
-      acc = Util.angle_to_vector(-self.angle)
+      acc = Util.angle_to_vector(self.angle)
       self.vel[0] += acc[0] * .2
-      self.vel[1] += acc[1] * .2
+      self.vel[1] -= acc[1] * .2
 
     self.vel[0] *= .99
     self.vel[1] *= .99
@@ -84,6 +84,7 @@ class Ship:
     forward = Util.angle_to_vector(self.angle)
     radius = self.get_radius()
     missile_pos = [self.pos[0] + radius * forward[0], self.pos[1] - radius * forward[1]]
-    missile_vel = [self.vel[0] + 15 * forward[0], self.vel[1] + 15 * forward[1]]
+    missile_speed = [15 * forward[0], -15 * forward[1]]
+    missile_vel = [self.vel[0] + missile_speed[0], self.vel[1] + missile_speed[1]]
     a_missile = Bullet(missile_pos, missile_vel, self.angle, 0, self.canvas)
     missile_group.add(a_missile)
