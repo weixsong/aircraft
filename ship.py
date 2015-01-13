@@ -22,6 +22,7 @@ class Ship(pygame.sprite.Sprite):
     self.angle = angle
     self.angle_vel = 0
     self.thrust = False
+    self.game_on = False
     screen = pygame.display.get_surface()
     self.area = screen.get_rect()
 
@@ -49,7 +50,11 @@ class Ship(pygame.sprite.Sprite):
       self.rect.move_ip([0, -self.area.height])
 
     # rotate
-    self.image = Util.rot_center(self.original, self.angle)
+    #self.image = Util.rot_center(self.original, self.angle)
+    center = self.rect.center
+    rotate = pygame.transform.rotate
+    self.image = rotate(self.original, self.angle)
+    self.rect = self.image.get_rect(center=center)
 
     # update velocity
     if self.thrust == True:
@@ -71,6 +76,9 @@ class Ship(pygame.sprite.Sprite):
 
   def reset_angle_vel(self):
     self.angle_vel = 0.0
+
+  def set_game_status(self, status):
+    self.game_on = status
 
   def shoot(self, missile_group):
     #TODO: fix this
