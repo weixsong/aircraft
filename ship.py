@@ -10,8 +10,12 @@ class Ship(pygame.sprite.Sprite):
   """moves a clenched fist on the screen, following the mouse"""
   def __init__(self, pos, vel, angle):
     pygame.sprite.Sprite.__init__(self)
-    self.image, self.rect = Util.load_image('double_ship.png')
-    self.original = self.image
+    self.image1, self.rect1 = Util.load_image('ship_unspeed.png')
+    self.image2, self.rect2 = Util.load_image('ship_speed.png')
+    self.image, self.rect = self.image1, self.rect1
+    self.rect.move_ip([-self.rect.width / 2, -self.rect.height / 2]) # move the ship to center
+    self.original1 = self.image1
+    self.original2 = self.image2
     self.rect.move_ip(pos)
 
     self.vel = vel
@@ -23,19 +27,30 @@ class Ship(pygame.sprite.Sprite):
     self.area = screen.get_rect()
 
   def update(self):
+    if self.thrust == False:
+      self.image = self.image1
+      self.original = self.image1
+    else:
+      self.image = self.image2
+      self.original = self.image2
+
     # update angle
     self.angle += self.angle_vel
+    self.angle %= 360
 
     # update position
     self.rect.move_ip(self.vel)
-    if self.rect.left < self.area.left or self.rect.right > self.area.right:
-      self.vel[0] = -self.vel[0]
-    if self.rect.top < self.area.top or self.rect.bottom > self.area.bottom:
-      self.vel[1] = -self.vel[1]
+    if self.rect.right < self.area.left:
+      self.rect.move_ip([self.area.width, 0])
+    elif self.rect.left > self.area.right:
+      self.rect.move_ip([-self.area.width, 0])
+    elif self.rect.bottom < self.area.top:
+      self.rect.move_ip([0, self.area.height])
+    elif self.rect.top > self.area.bottom:
+      self.rect.move_ip([0, -self.area.height])
 
     # rotate
-    rotate = pygame.transform.rotate
-    self.image = rotate(self.original, self.angle)
+    self.image = Util.rot_center(self.original, self.angle)
 
     # update velocity
     if self.thrust == True:
@@ -47,7 +62,7 @@ class Ship(pygame.sprite.Sprite):
     self.vel[1] *= .99
 
     if self.game_on == False:
-      self.angle_vel *= 0.99
+      self.angle_vel *= 0.98
 
   def increment_angle_vel(self):
     self.angle_vel -= 0.03
