@@ -9,15 +9,15 @@ class Controller:
   HEIGHT = 600
 
   def __init__(self):
-    self.ship = Ship([400, 300], [0, 0], 45)
-    self.allsprites = pygame.sprite.RenderPlain((self.ship,))
+    self.ship = Ship([400, 300], [12, 0], 0)
+    self.allships = pygame.sprite.RenderPlain((self.ship,))
     self.screen = pygame.display.get_surface()
 
   def update(self):
-    self.allsprites.update()
+    self.allships.update()
 
   def draw(self):
-    self.allsprites.draw(self.screen)
+    self.allships.draw(self.screen)
 
 def main():
   pygame.init()

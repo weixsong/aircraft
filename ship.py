@@ -21,7 +21,6 @@ class Ship(pygame.sprite.Sprite):
     self.vel = vel
     self.angle = angle
     self.angle_vel = 0
-    self.game_on = False
     self.thrust = False
     screen = pygame.display.get_surface()
     self.area = screen.get_rect()
@@ -72,9 +71,6 @@ class Ship(pygame.sprite.Sprite):
 
   def reset_angle_vel(self):
     self.angle_vel = 0.0
-
-  def set_game_state(self, state):
-    self.game_on = state
 
   def shoot(self, missile_group):
     #TODO: fix this
