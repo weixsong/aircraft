@@ -12,6 +12,7 @@ class Util:
 
   @staticmethod
   def angle_to_vector(ang):
+    ang = ang / float(180) * math.pi
     return [math.cos(ang), math.sin(ang)]
 
   @staticmethod

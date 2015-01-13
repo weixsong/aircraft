@@ -1,95 +1,50 @@
-import Image 
-import ImageTk
-import Tkinter
 from utils import Util
 import math
-import sound
+import pygame
+from pygame.locals import *
 
-class Sprite:
-  ''' base class for Rock, Bullet '''
+if not pygame.font: print 'Warning, fonts disabled'
+if not pygame.mixer: print 'Warning, sound disabled'
 
-  def __init__(self, pos, vel, ang, ang_vel, radius, canvas):
-    self.pos = pos
-    self.vel = vel
-    self.angle = ang
-    self.angle_vel = ang_vel
-    self.radius = radius
-    self.canvas = canvas
-
-  def collide(self, other_object):
-    distance = Util.dist(self.get_position(), other_object.get_position())
-    sum_r = self.get_radius() + other_object.get_radius()
-    if distance > sum_r:
-      return False
-    else:
-      return True
-
-  def draw(self):
-    assert False, "action should be defined"
-
-  def update(self):
-    assert False, "action should be defined"
-
-  def get_position(self):
-    return self.pos
-
-  def get_radius(self):
-    return self.radius
-
-class Rock(Sprite):
+class Rock(pygame.sprite.Sprite):
   LIMIT = 12
   RADIUS = 40
-  IMG_CENTER = [45, 45]
-  IMG_SIZE = [90, 90]
 
-  def __init__(self, pos, vel, ang, ang_vel, canvas):
-    Sprite.__init__(self, pos, vel, ang, ang_vel, Rock.RADIUS, canvas)
-    self.img = Image.open("./images/asteroid_blue.png")
+  def __init__(self, pos, vel, angle_vel):
+    pygame.sprite.Sprite.__init__(self)
+    self.image, self.rect = Util.load_image('asteroid_blue.png')
+    self.original = self.image
+    self.area = pygame.display.get_surface().get_rect()
+    self.vel = vel
+    self.angle_vel = angle_vel
+    self.angle = 0
 
-  def draw(self):
-    upleft_x = self.pos[0] - Rock.IMG_CENTER[0]
-    upleft_y = self.pos[1] - Rock.IMG_CENTER[1]
-    self.image = ImageTk.PhotoImage(self.img.rotate(self.angle * 180 / math.pi, resample=Image.BICUBIC))
-    self.canvas.create_image(upleft_x, upleft_y, anchor=Tkinter.NW, image=self.image)
+    self.rect.move_ip(pos)
+    self.rect.move_ip([-self.rect.width / 2, -self.rect.height / 2])
 
   def update(self):
     # update angle
     self.angle += self.angle_vel
 
     # update position
-    self.pos[0] = (self.pos[0] + self.vel[0]) % self.canvas.CANVAS_WIDTH
-    self.pos[1] = (self.pos[1] - self.vel[1]) % self.canvas.CANVAS_HEIGHT
-    return False
+    self.rect.move_ip(self.vel)
+    # rotate,  not smooth, bad for pygame
+    center = self.rect.center
+    rotate = pygame.transform.rotate
+    self.image = rotate(self.original, self.angle)
+    self.rect = self.image.get_rect(center=center)
 
-class Bullet(Sprite):
-  RADIUS = 3
-  LIFE = 25
-  IMG_CENTER = [5, 5]
-  IMG_SIZE = [10, 10]
+    # make rock in screen
+    if self.rect.right < self.area.left:
+      self.rect.move_ip([self.area.width, 0])
+    elif self.rect.left > self.area.right:
+      self.rect.move_ip([-self.area.width, 0])
+    elif self.rect.bottom < self.area.top:
+      self.rect.move_ip([0, self.area.height])
+    elif self.rect.top > self.area.bottom:
+      self.rect.move_ip([0, -self.area.height])
 
-  def __init__(self, pos, vel, ang, ang_vel, canvas):
-    Sprite.__init__(self, pos, vel, ang, ang_vel, Bullet.RADIUS, canvas)
-    sound.missile.play()
-    self.img = Image.open('./images/shot2.png')
-    self.age = 0
-
-  def draw(self):
-    upleft_x = self.pos[0] - Bullet.IMG_CENTER[0]
-    upleft_y = self.pos[1] - Bullet.IMG_CENTER[1]
-    self.image = ImageTk.PhotoImage(self.img) # bullet do not need rotate
-    self.canvas.create_image(upleft_x, upleft_y, anchor=Tkinter.NW, image=self.image)
-
-  def update(self):
-    # update position
-    self.age += 1
-    if self.age > Bullet.LIFE:
-        return True
-
-    self.pos[0] = (self.pos[0] + self.vel[0]) % self.canvas.CANVAS_WIDTH
-    self.pos[1] = (self.pos[1] - self.vel[1]) % self.canvas.CANVAS_HEIGHT
-    return False
-
-class Explosion(Sprite):
+class Explosion(pygame.sprite.Sprite):
   RADIUS = 17
   LIFE = 24
   IMG_CENTER = [64, 64]
