@@ -1,1 +1,8 @@
-1. change all UI by pygame
+1. add sound
+2. check logic
+
+issues:
+1. collsion detection is not good, 
+in pygame, just detect if two rectangles overlap,
+this method bad for collsion detection.
+2. image rotate is not smooth

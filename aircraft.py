@@ -5,7 +5,7 @@ from utils import Util
 from pygame.locals import *
 from threading import Timer
 import threading
-from sprite import Rock
+from sprite import *
 import random
 
 class RockSpanTimer(threading.Thread):
@@ -132,8 +132,11 @@ class Controller:
     self.rock_group.update()
     # check for collision
     rocks_hit_list = pygame.sprite.spritecollide(self.ship, self.rock_group, True)
-    for block in rocks_hit_list:
+    for rock in rocks_hit_list:
       # TODO: play explosion
+      center = rock.rect.center
+      explosion = Explosion(center)
+      self.explosion_group.add(explosion)
       self.lives -= 1
       if self.lives == 0:
         self.game_over()
@@ -144,13 +147,19 @@ class Controller:
       num = len(rocks)
       self.score += num
       for rock in rocks:
-        # play explosion
-        pass
+        center = rock.rect.center
+        explosion = Explosion(center)
+        self.explosion_group.add(explosion)
+
+    for explosion in self.explosion_group.sprites():
+      if explosion.update() == True:
+        explosion.kill()
 
   def draw(self):
     self.allships.draw(self.screen)
     self.missile_group.draw(self.screen)
     self.rock_group.draw(self.screen)
+    self.explosion_group.draw(self.screen)
 
     if self.started == False:
       self.screen.blit(self.splash, self.splash_pos)

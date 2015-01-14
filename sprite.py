@@ -47,34 +47,22 @@ class Rock(pygame.sprite.Sprite):
 class Explosion(pygame.sprite.Sprite):
   RADIUS = 17
   LIFE = 24
-  IMG_CENTER = [64, 64]
-  IMG_SIZE = [128, 128]
 
-  def __init__(self, pos, canvas):
-    Sprite.__init__(self, pos, [0, 0], 0, [0, 0], Explosion.RADIUS, canvas)
-    self.img = Image.open('./images/explosion_alpha.png')
+  def __init__(self, pos):
+    pygame.sprite.Sprite.__init__(self)
+    self.original, self.rect = Util.load_image('explosion_alpha.png')
+    self.rect = pygame.Rect(pos[0] - 64, pos[1] - 64, 128, 128)
+    self.pos = pos
+    self.height = self.rect.height
+    r = pygame.Rect(0, 0, self.height, self.height)
+    self.image = self.original.subsurface(r)
     self.age = 0
-    self.x = self.pos[0] - Explosion.IMG_CENTER[0]
-    self.y = self.pos[1] - Explosion.IMG_CENTER[1]
-    self.sound = False
-
-  def draw(self):
-    if self.sound == False:
-      sound.explosion.play()
-      self.sound = True
-
-    x1 = 0 + self.age * Explosion.IMG_SIZE[0]
-    y1 = 0
-    x2 = x1 + Explosion.IMG_SIZE[0]
-    y2 = Explosion.IMG_SIZE[1]
-    image = self.img.crop((x1, y1, x2, y2))
-    self.image = ImageTk.PhotoImage(image)
-    self.canvas.create_image(self.x, self.y, anchor=Tkinter.NW, image=self.image)
 
   def update(self):
     # update age
     self.age += 1
-    if self.age > Bullet.LIFE:
+    if self.age >= Explosion.LIFE:
         return True
-
+    r = pygame.Rect(self.age * self.height, 0, self.height, self.height)
+    self.image = self.original.subsurface(r)
     return False
