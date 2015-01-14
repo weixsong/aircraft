@@ -1,4 +1,3 @@
-1. add sound
 2. check logic
 3. refactor, make basic class and sub class
 
@@ -9,3 +8,10 @@ this method bad for collsion detection.
 2. image rotate is not smooth
 3. ship will move horizontally or vertically when slow down, 
 seems to be problem of pygame about rect.move, need to verify.
+
+Note:
+Actually, I don't like pygame framework, the effectivness is not good,
+even tkinter performs better than pygame,
+but this framework make it easier to develop games, because it's a framework 
+developed for games. So, maybe pygame could be optimized to get better performance.
+Aircraft created by tkinter performs better than this.
