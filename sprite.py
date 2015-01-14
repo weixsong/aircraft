@@ -2,6 +2,7 @@ from utils import Util
 import math
 import pygame
 from pygame.locals import *
+import sound
 
 if not pygame.font: print 'Warning, fonts disabled'
 if not pygame.mixer: print 'Warning, sound disabled'
@@ -57,6 +58,7 @@ class Explosion(pygame.sprite.Sprite):
     r = pygame.Rect(0, 0, self.height, self.height)
     self.image = self.original.subsurface(r)
     self.age = 0
+    sound.explosion.play()
 
   def update(self):
     # update age

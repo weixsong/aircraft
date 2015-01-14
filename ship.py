@@ -2,6 +2,7 @@ from utils import Util
 import os, sys
 import pygame
 from pygame.locals import *
+import sound
 
 if not pygame.font: print 'Warning, fonts disabled'
 if not pygame.mixer: print 'Warning, sound disabled'
@@ -77,6 +78,10 @@ class Ship(pygame.sprite.Sprite):
 
   def set_thrust(self, status):
     self.thrust = status
+    if status == True:
+      sound.thrust.play()
+    else:
+      sound.thrust.stop()
 
   def increment_angle_vel(self):
     self.angle_vel += 2
@@ -111,6 +116,7 @@ class Missile(pygame.sprite.Sprite):
     self.pos = pos
     self.vel = vel
     self.age = 0
+    sound.missile.play()
 
   def update(self):
     # update position

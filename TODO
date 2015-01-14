@@ -1,8 +1,11 @@
 1. add sound
 2. check logic
+3. refactor, make basic class and sub class
 
 issues:
 1. collsion detection is not good, 
 in pygame, just detect if two rectangles overlap,
 this method bad for collsion detection.
 2. image rotate is not smooth
+3. ship will move horizontally or vertically when slow down, 
+seems to be problem of pygame about rect.move, need to verify.

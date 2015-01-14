@@ -7,6 +7,7 @@ from threading import Timer
 import threading
 from sprite import *
 import random
+import sound
 
 class RockSpanTimer(threading.Thread):
   def __init__(self, controller, interval):
@@ -58,11 +59,13 @@ class Controller:
     self.rock_group = pygame.sprite.Group()
     self.missile_group = pygame.sprite.Group()
     self.explosion_group = pygame.sprite.Group()
+    sound.soundtrack.play()
     self.timer = RockSpanTimer(self, 1.5)
     self.timer.start()
 
   def game_over(self):
     self.timer.stop()
+    sound.soundtrack.stop()
     self.ship.set_game_status(False)
     self.ship.set_thrust(False)
     self.started = False
