@@ -1,3 +1,5 @@
+prototype done. 14/1/2015, watkinsong
+
 issues:
 1. collsion detection is not good, 
 in pygame, just detect if two rectangles overlap,
