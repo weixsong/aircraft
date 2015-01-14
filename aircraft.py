@@ -45,6 +45,7 @@ class Controller:
     self.rock_group = pygame.sprite.Group()
     self.missile_group = pygame.sprite.Group()
     self.explosion_group = pygame.sprite.Group()
+    self.timer = RockSpanTimer(self, 1.5)
 
   def new_game(self):
     self.lives = 3
@@ -64,7 +65,7 @@ class Controller:
     self.timer.stop()
     self.ship.set_game_status(False)
     self.ship.set_thrust(False)
-    self.is_started = False
+    self.started = False
     self.rock_group.empty()
     self.missile_group.empty()
     self.explosion_group.empty()
@@ -78,15 +79,15 @@ class Controller:
         print 'new game started'
         self.new_game()
 
-    if self.started != True:
-      return
-
     if event.type == QUIT:
       self.timer.stop()
       sys.exit()
     elif event.type == KEYDOWN and event.key == K_ESCAPE:
       self.timer.stop()
       sys.exit()
+
+    if self.started != True:
+      return
     elif event.type == KEYDOWN and event.key == K_UP:
       self.ship.set_thrust(True)
     elif event.type == KEYDOWN and event.key == K_LEFT:
@@ -129,6 +130,22 @@ class Controller:
         missile.kill()
 
     self.rock_group.update()
+    # check for collision
+    rocks_hit_list = pygame.sprite.spritecollide(self.ship, self.rock_group, True)
+    for block in rocks_hit_list:
+      # TODO: play explosion
+      self.lives -= 1
+      if self.lives == 0:
+        self.game_over()
+        return
+
+    missile_rock_collision = pygame.sprite.groupcollide(self.missile_group, self.rock_group, True, True)
+    for missile, rocks in missile_rock_collision.iteritems():
+      num = len(rocks)
+      self.score += num
+      for rock in rocks:
+        # play explosion
+        pass
 
   def draw(self):
     self.allships.draw(self.screen)
@@ -170,9 +187,27 @@ def main():
     screen.blit(bg, (0, 0))
     wtime = (counter / 4) % screen.get_rect().width
     screen.blit(dubris, (wtime, 0))
+    draw_text(screen, controller)
     controller.update()
     controller.draw()
     pygame.display.flip()
+
+def draw_text(screen, controller):
+  livefont = pygame.font.SysFont("Times", 25)
+  label = livefont.render('lives', 1, (255, 255, 255))
+  screen.blit(label, (50, 30))
+
+  livefont = pygame.font.SysFont("Times", 25)
+  label = livefont.render('score', 1, (255, 255, 255))
+  screen.blit(label, (720, 30))
+
+  livefont = pygame.font.SysFont("Times", 25)
+  label = livefont.render(str(controller.lives), 1, (255, 255, 255))
+  screen.blit(label, (50, 60))
+
+  livefont = pygame.font.SysFont("Times", 25)
+  label = livefont.render(str(controller.score), 1, (255, 255, 255))
+  screen.blit(label, (720, 60))
 
 if __name__ == '__main__':
   main()
