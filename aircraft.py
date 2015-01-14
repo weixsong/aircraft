@@ -1,6 +1,5 @@
 import os, sys
 import pygame
-from ship import Ship
 from utils import Util
 from pygame.locals import *
 from threading import Timer

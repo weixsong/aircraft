@@ -1,6 +1,3 @@
-2. check logic
-3. refactor, make basic class and sub class
-
 issues:
 1. collsion detection is not good, 
 in pygame, just detect if two rectangles overlap,
