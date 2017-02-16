@@ -1,0 +1,10 @@
+1. right now, UI is build by tkinter, 
+change UI to pygame
+
+2. right now, refresh canvas is by canvas.after method,
+thread is tested, by the canvas will flash badly.
+Make it more efficient.
+
+3. find more efficient thread, such as Timer, but in python 
+Timer could only be called once?
+And Thread also only could be called one time.
